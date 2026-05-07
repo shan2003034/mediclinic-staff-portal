@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import ReceptionDashboard from './pages/ReceptionDashboard';
-import StaffLayout from './components/StaffLayout'; // අලුත් Layout එක
+import StaffLayout from './components/StaffLayout'; 
 import PatientsDirectory from './pages/PatientsDirectory';
 import AppointmentsManagement from './pages/AppointmentsManagement';
 import BillingPage from './pages/BillingPage';
@@ -20,10 +20,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* 1. Login Page: මේකට කිසිම Layout එකක් සම්බන්ධ වෙන්නේ නෑ */}
+       
         <Route path="/login" element={<Login />} />
 
-        {/* 2. Staff Pages: මේ හැම එකක්ම StaffLayout එකෙන් Wrap කරලා තියෙන්නේ */}
+      
         <Route
           path="/reception/*"
           element={
@@ -89,7 +89,7 @@ function App() {
 
 
 
-        {/* Default Route */}
+       
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

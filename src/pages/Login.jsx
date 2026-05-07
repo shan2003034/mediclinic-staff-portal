@@ -1,39 +1,39 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. Redirect කරන්න useNavigate ගත්තා
-import axios from 'axios'; // 2. API Call කරන්න Axios ගත්තා
+import { useNavigate } from 'react-router-dom'; 
+import axios from 'axios'; 
 import mediclinicLogo from '../assets/mediclinic-logo.png'; 
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(''); // වැරදි පාස්වර්ඩ් ගැහුවොත් Error එක පෙන්වන්න
-  const [isLoading, setIsLoading] = useState(false); // ලොග් වෙනකම් බට්න් එක ලෝඩ් වෙනවා පෙන්වන්න
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false); 
 
   const navigate = useNavigate();
 
-  // --- Backend එකත් එක්ක සම්බන්ධ වෙන ප්‍රධානම Function එක ---
+ 
   const handleLogin = async (e) => {
-    e.preventDefault(); // Form එක Submit වෙද්දි පේජ් එක Refresh වෙන එක නවත්වනවා
+    e.preventDefault(); 
     setError('');
     setIsLoading(true);
 
     try {
-      // Backend එකට Email, Password යවනවා
+      
       const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/staff-login`, {
         email: email,
         password: password
       });
 
-      // Backend එකෙන් එන Token එක සහ Role එක ගන්නවා
+    
       const { token, role } = response.data;
 
-      // 3. LocalStorage එකේ Data සේව් කරනවා (Dashboard එකේ පාවිච්චියට)
+  
       localStorage.setItem('staffToken', token);
       localStorage.setItem('staffRole', role);
       localStorage.setItem('staffEmail', email); 
-      // (ඔයාට Backend එකෙන් Name එකකුත් එවනවා නම් ඒකත් මෙතනදි setItem කරන්න පුළුවන්)
+     
 
-      // 4. Role එක අනුව අදාළ Dashboard එකට Redirect කරනවා
+    
       if (role === 'ADMIN') {
         navigate('/admin');
       } else if (role === 'DOCTOR') {
@@ -45,7 +45,7 @@ function Login() {
       }
 
     } catch (err) {
-      // Backend එකෙන් Error එකක් ආවොත් (උදා: පාස්වර්ඩ් වැරදියි)
+     
       console.error("Login Error:", err);
       setError('Invalid email or password. Please try again.');
     } finally {
