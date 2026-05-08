@@ -1,16 +1,61 @@
-# React + Vite
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Construction.png" alt="Construction" width="100" height="100" />
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<h1 align="center">🚀 [Medi Clinic Staff Portal]</h1>
 
-Currently, two official plugins are available:
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Work_in_Progress-orange?style=for-the-badge&logo=github" alt="Status WIP" />
+  <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge" alt="Maintained" />
+  <img src="https://img.shields.io/github/stars/[GitHub-Username]/[Repo-Name]?style=for-the-badge" alt="Stars" />
+</p>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+<p align="center">
+  <strong>This project is currently under active development. Pardon our dust! 🏗️</strong>
+</p>
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 📝 Project Overview
+[MediClinic Staff Portal is a secure, role-based hospital management application designed to streamline daily healthcare operations. Built with a modern full-stack architecture (React + Spring Boot), it provides specialized dashboards for Doctors, Receptionists, and Administrators. Key features include JWT-based authentication, real-time patient queue management, dynamic profile settings, and tailored workflows to enhance hospital efficiency and patient care.]
 
-## Expanding the ESLint configuration
+### 🛠️ Tech Stack
+This project is being built using the following technologies:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+<p align="left">
+  <a href="https://skillicons.dev">
+    <!-- You can add or remove icons from the link below based on your actual tech stack -->
+    <img src="https://skillicons.dev/icons?i=java,spring,hibernate,mysql,react,androidstudio&theme=dark" alt="Tech Stack" />
+  </a>
+</p>
+
+### 🚧 Current Progress
+The development roadmap and current status are tracked below:
+
+- [x] Initial Project Setup & Architecture
+- [x] Database Schema Design
+- [x] Frontend UI Implementation 
+- [ ] Backend API Development 🏗️ *(In Progress)*
+- [ ] Integration & Testing 
+- [ ] Final Deployment 
+
+### 📈 Project Analytics
+<p align="center">
+  <!-- Note: You can generate a RepoBeats chart at https://repobeats.axiom.co/ and paste the link here -->
+  <img src="https://repobeats.axiom.co/api/embed/[Your-Repo-ID-Here].svg" alt="Repo Analytics" />
+</p>
+
+---
+
+### 🤝 Let's Connect!
+Feel free to reach out for collaborations or if you have any questions regarding the project!
+
+<p align="left">
+<a href="https://www.linkedin.com/in/prasannalakshan" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="LinkedIn" height="30" width="40" /></a>
+<a href="https://github.com/[shan2003034]" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/github.svg" alt="GitHub" height="30" width="40" /></a>
+</p>
+
+---
+<p align="center">
+  Developed with ❤️ by <b>Prasanna Lakshan</b>
+</p>
