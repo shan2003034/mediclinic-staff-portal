@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Construction.png" alt="Construction" width="100" height="100" />
+  <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f6a7/512.gif" alt="Construction" width="100" height="100" />
 </p>
 
 <h1 align="center">🚀 Medi Clinic Staff Portal</h1>
