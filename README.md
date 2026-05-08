@@ -2,12 +2,12 @@
   <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Construction.png" alt="Construction" width="100" height="100" />
 </p>
 
-<h1 align="center">🚀 [Medi Clinic Staff Portal]</h1>
+<h1 align="center">🚀 Medi Clinic Staff Portal</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Work_in_Progress-orange?style=for-the-badge&logo=github" alt="Status WIP" />
   <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge" alt="Maintained" />
-  <img src="https://img.shields.io/github/stars/[GitHub-Username]/[Repo-Name]?style=for-the-badge" alt="Stars" />
+  <img src="https://img.shields.io/github/stars/shan2003034/mediclinic-staff-portal?style=for-the-badge" alt="Stars" />
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
 ---
 
 ### 📝 Project Overview
-[MediClinic Staff Portal is a secure, role-based hospital management application designed to streamline daily healthcare operations. Built with a modern full-stack architecture (React + Spring Boot), it provides specialized dashboards for Doctors, Receptionists, and Administrators. Key features include JWT-based authentication, real-time patient queue management, dynamic profile settings, and tailored workflows to enhance hospital efficiency and patient care.]
+MediClinic Staff Portal is a secure, role-based hospital management application designed to streamline daily healthcare operations. Built with a modern full-stack architecture (React + Spring Boot), it provides specialized dashboards for Doctors, Receptionists, and Administrators. Key features include JWT-based authentication, real-time patient queue management, dynamic profile settings, and tailored workflows to enhance hospital efficiency and patient care.
 
 ### 🛠️ Tech Stack
 This project is being built using the following technologies:
@@ -41,10 +41,8 @@ The development roadmap and current status are tracked below:
 
 ### 📈 Project Analytics
 <p align="center">
-  <!-- Note: You can generate a RepoBeats chart at https://repobeats.axiom.co/ and paste the link here -->
-  <img src="https://repobeats.axiom.co/api/embed/[Your-Repo-ID-Here].svg" alt="Repo Analytics" />
+  <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f6a7/512.gif" alt="Construction" width="100" height="100" />
 </p>
-
 ---
 
 ### 🤝 Let's Connect!
@@ -52,7 +50,7 @@ Feel free to reach out for collaborations or if you have any questions regarding
 
 <p align="left">
 <a href="https://www.linkedin.com/in/prasannalakshan" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="LinkedIn" height="30" width="40" /></a>
-<a href="https://github.com/[shan2003034]" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/github.svg" alt="GitHub" height="30" width="40" /></a>
+<a href="https://github.com/shan2003034" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/github.svg" alt="GitHub" height="30" width="40" /></a>
 </p>
 
 ---
