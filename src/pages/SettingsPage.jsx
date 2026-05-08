@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import AlertMessage from '../components/AlertMessage'; 
 
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
-  
   
   const userId = localStorage.getItem('userId') || 1; 
   const token = localStorage.getItem('staffToken');
@@ -14,6 +14,9 @@ function SettingsPage() {
   const [email, setEmail] = useState('');
   const [profileImage, setProfileImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  
+  
+  const [imageError, setImageError] = useState(''); 
   const fileInputRef = useRef(null);
 
   // Password States
@@ -26,7 +29,6 @@ function SettingsPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  
   useEffect(() => {
     if (userId && token) {
       axios.get(`http://localhost:8080/api/users/${userId}`, {
@@ -36,7 +38,6 @@ function SettingsPage() {
         setFirstName(response.data.firstName || '');
         setLastName(response.data.lastName || '');
         setEmail(response.data.email || '');
-        
         
         if (response.data.profileImage) {
           setImagePreview(response.data.profileImage);
@@ -48,23 +49,46 @@ function SettingsPage() {
     }
   }, [userId, token]);
 
-  
-  const handleImageChange = (e) => {
+ const handleImageChange = (e) => {
     const file = e.target.files[0];
+    
+    setError(''); 
+    setMessage('');
+
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        setError('Image size must be less than 2MB');
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      
+      if (!validTypes.includes(file.type)) {
+        setError('Invalid format! Please upload a JPG, PNG, or GIF.'); 
+        setImageError('Invalid format!');
+        setProfileImage(null);
+        e.target.value = ''; 
         return;
       }
+
+      if (file.size > 2 * 1024 * 1024) {
+        setError('Image is too large! Maximum allowed size is 2MB.');
+        setImageError('Size limit exceeded!');
+        setProfileImage(null);
+        e.target.value = '';
+        return;
+      }
+
       setProfileImage(file);
       setImagePreview(URL.createObjectURL(file));
-      setError('');
+      setImageError('');
+      setError(''); 
     }
   };
 
-  
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
+    
+    if (imageError) {
+      setError('Please fix the image issues before saving.');
+      return;
+    }
+
     setIsLoading(true);
     setMessage('');
     setError('');
@@ -91,14 +115,17 @@ function SettingsPage() {
       localStorage.setItem('staffEmail', email);
     } catch (err) {
       
-      const errorMsg = err.response?.data?.message || err.response?.data?.error || (typeof err.response?.data === 'string' ? err.response?.data : 'Failed to update profile');
-      setError(errorMsg);
+      if (err.response && err.response.status === 413) {
+        setError('File is too large for the server! Please select a smaller image.');
+      } else {
+        const errorMsg = err.response?.data?.message || err.response?.data?.error || (typeof err.response?.data === 'string' ? err.response?.data : 'Failed to update profile');
+        setError(errorMsg);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 3. Password Update කිරීම (Token එක සමඟ)
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -145,8 +172,9 @@ function SettingsPage() {
         <p className="text-slate-500 font-medium mt-1">Manage your personal information and security.</p>
       </div>
 
-      {message && <div className="mb-4 p-4 bg-green-50 text-green-700 rounded-xl border border-green-200 font-medium">{message}</div>}
-      {error && <div className="mb-4 p-4 bg-red-50 text-red-700 rounded-xl border border-red-200 font-medium">{error}</div>}
+      
+      <AlertMessage type="success" message={message} />
+      <AlertMessage type="error" message={error} />
 
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="w-full lg:w-72 shrink-0">
@@ -172,9 +200,15 @@ function SettingsPage() {
                     {imagePreview ? <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" /> : (firstName ? firstName.charAt(0).toUpperCase() : 'U')}
                   </div>
                   <div>
-                    <input type="file" accept="image/png, image/jpeg, image/gif" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
+                    
+<input type="file" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
                     <button type="button" onClick={() => fileInputRef.current.click()} className="px-5 py-2.5 bg-slate-50 text-slate-700 font-bold rounded-xl border border-slate-200 hover:bg-slate-100 transition-all text-sm shadow-sm mb-2">Choose Picture</button>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">JPG, GIF or PNG. Max size of 2MB.</p>
+                    
+                    
+                    {imageError && (
+                      <p className="text-xs font-bold text-red-500 mt-2">{imageError}</p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
