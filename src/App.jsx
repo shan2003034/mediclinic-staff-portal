@@ -14,6 +14,7 @@ import SettingsPage from './pages/SettingsPage';
 import AdminDashboard from './pages/AdminDashboard';
 import StaffDirectory from './pages/StaffDirectory';
 import FinancialReports from './pages/FinancialReports';
+import TodayAppointments from './pages/TodayAppointments';
 
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
         <Route path="/doctor/consultations" element={<StaffLayout><ConsultationHistory /></StaffLayout>} />
         <Route path="/reception/settings" element={<StaffLayout><SettingsPage /></StaffLayout>} />
         <Route path="/doctor/settings" element={<StaffLayout><SettingsPage /></StaffLayout>} />
+        <Route path="/doctor/todayAppoinments" element={<StaffLayout><TodayAppointments /></StaffLayout>} />
 
         <Route path="/admin" element={<StaffLayout><AdminDashboard /></StaffLayout>} />
         <Route path="/admin/staff" element={<StaffLayout><StaffDirectory /></StaffLayout>} />
