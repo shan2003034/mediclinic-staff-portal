@@ -1,41 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import StatCard from '../components/StatCard';
-import ConsultationRecordOffcanvas from '../components/ConsultationRecordOffcanvas'; // 1. අලුත් Component එක Import කළා
+import ConsultationRecordOffcanvas from '../components/ConsultationRecordOffcanvas'; 
 
 function ConsultationHistory() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // 2. Offcanvas එක පාලනය කරන්න States හැදුවා
   const [selectedRecord, setSelectedRecord] = useState(null);
+  
+  const [historyData, setHistoryData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Stats Area
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('staffToken');
+
+        if (!userId || !token) {
+          setError("Authentication error. Please login again.");
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await axios.get(`http://localhost:8080/api/consultations/doctor/${userId}/history`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setHistoryData(response.data);
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching history:", err);
+        setError("Failed to load consultation history.");
+        setIsLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, []);
+
+  // 👇 මාසයේ සහ අද දවසේ රෝගීන් ගණන ගණනය කිරීම
+  const today = new Date().toISOString().split('T')[0]; 
+  const todaysConsultations = historyData.filter(item => item.date === today).length;
+
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const monthlyConsultations = historyData.filter(item => {
+    if (!item.date || item.date === "N/A") return false;
+    const itemDate = new Date(item.date);
+    return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+  }).length;
+
+  // 👇 Stats කාඩ් ටික යාවත්කාලීන කිරීම (Avg Time අයින් කළා)
   const stats = [
-    { label: "Today's Consultations", value: "24", iconPath: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z", color: "blue" },
-    { label: "Avg. Time per Patient", value: "12m", iconPath: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", color: "emerald" },
-    { label: "Total History", value: "1,450", iconPath: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", color: "amber" },
+    { label: "Today's Consultations", value: todaysConsultations.toString(), iconPath: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z", color: "blue" },
+    { label: "Patients Seen This Month", value: monthlyConsultations.toString(), iconPath: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z", color: "emerald" },
+    { label: "Total History", value: historyData.length.toString(), iconPath: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", color: "amber" },
   ];
 
-  // Mock Data (Consultation Notes ද ඇතුළත් කර ඇත)
-  const historyData = Array.from({ length: 12 }, (_, i) => ({
-    id: `CON-${5000 + i}`,
-    patientName: i === 0 ? "Shan Gajanayake" : i === 1 ? "Kasun Perera" : `Patient ${i + 1}`,
-    reason: i % 3 === 0 ? "Severe Headache" : i % 2 === 0 ? "Fever & Cold" : "Regular Checkup",
-    notes: i % 3 === 0 ? "Patient reported severe migraines lasting for 3 days. Prescribed painkillers and advised bed rest." : null, // සමහර ඒවට Notes දැම්මා
-    date: `2026-04-${27 - (i % 5)}`,
-    time: `10:${15 + i} AM`,
-    prescriptionId: `Rx-880${i}`,
-    status: "Completed"
-  }));
-
-  // Search Logic
   const filteredHistory = historyData.filter(item => 
     item.patientName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    item.id.toLowerCase().includes(searchTerm.toLowerCase())
+    item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.reason && item.reason.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentHistory = filteredHistory.slice(indexOfFirstItem, indexOfLastItem);
@@ -46,28 +77,17 @@ function ConsultationHistory() {
   return (
     <div className="p-6 lg:p-8 font-sans animate-fade-in relative">
       
-      {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
         <div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight">Consultation History</h1>
           <p className="text-slate-500 font-medium mt-1">Search and review past clinical records and prescriptions.</p>
         </div>
-        <div className="flex items-center gap-3">
-           <input 
-              type="date" 
-              className="px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-600 text-sm outline-none focus:border-blue-500 cursor-pointer" 
-            />
-        </div>
       </div>
 
-      {/* Stats Area */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        {stats.map((s, idx) => (
-          <StatCard key={idx} {...s} />
-        ))}
+        {stats.map((s, idx) => <StatCard key={idx} {...s} />)}
       </div>
 
-      {/* Search & Filters */}
       <div className="bg-white p-4 rounded-[2rem] shadow-sm border border-slate-100 mb-8">
         <div className="relative w-full">
           <input 
@@ -81,7 +101,8 @@ function ConsultationHistory() {
         </div>
       </div>
 
-      {/* History Table */}
+      {error && <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl font-medium border border-red-100">{error}</div>}
+
       <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -95,7 +116,11 @@ function ConsultationHistory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {currentHistory.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="5" className="px-8 py-10 text-center text-slate-500 font-bold">Loading records...</td>
+                </tr>
+              ) : currentHistory.length > 0 ? (
                 currentHistory.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-8 py-5">
@@ -118,7 +143,6 @@ function ConsultationHistory() {
                       <p className="text-[10px] font-bold text-blue-600 uppercase mt-0.5">{item.time}</p>
                     </td>
                     <td className="px-8 py-5 text-right">
-                      {/* 3. බොත්තම එබුවාම Record එක State එකට සේව් කරනවා */}
                       <button 
                         onClick={() => setSelectedRecord(item)}
                         className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all"
@@ -130,7 +154,7 @@ function ConsultationHistory() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-8 py-10 text-center text-slate-400 font-medium">No records found matching your search.</td>
+                  <td colSpan="5" className="px-8 py-10 text-center text-slate-400 font-medium">No records found.</td>
                 </tr>
               )}
             </tbody>
@@ -138,8 +162,7 @@ function ConsultationHistory() {
         </div>
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
+      {!isLoading && totalPages > 1 && (
         <div className="flex items-center justify-between bg-white px-8 py-5 rounded-3xl shadow-sm border border-slate-100">
           <p className="text-sm text-slate-500 font-medium hidden sm:block">
             Showing <span className="font-bold text-slate-800">{indexOfFirstItem + 1}</span> to <span className="font-bold text-slate-800">{Math.min(indexOfLastItem, filteredHistory.length)}</span> of <span className="font-bold text-slate-800">{filteredHistory.length}</span> records
@@ -162,10 +185,9 @@ function ConsultationHistory() {
         </div>
       )}
 
-      {/* 4. අලුත් Offcanvas එක පිටුවේ යටින් Render කරනවා */}
       <ConsultationRecordOffcanvas 
-        isOpen={!!selectedRecord} // Record එකක් තියෙනවා නම් True වෙනවා
-        onClose={() => setSelectedRecord(null)} // Close කරද්දී Record එක Null කරනවා
+        isOpen={!!selectedRecord} 
+        onClose={() => setSelectedRecord(null)} 
         record={selectedRecord}
       />
 
