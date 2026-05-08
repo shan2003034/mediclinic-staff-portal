@@ -11,29 +11,26 @@ function Login() {
 
   const navigate = useNavigate();
 
- 
   const handleLogin = async (e) => {
     e.preventDefault(); 
     setError('');
     setIsLoading(true);
 
     try {
-      
       const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/staff-login`, {
         email: email,
         password: password
       });
 
-    
-      const { token, role } = response.data;
+      // 👇 මෙතනින් userId එකත් ගන්නවා
+      const { token, role, userId } = response.data;
 
-  
+      // 👇 localStorage එකේ userId එකත් සේව් කරනවා
       localStorage.setItem('staffToken', token);
       localStorage.setItem('staffRole', role);
       localStorage.setItem('staffEmail', email); 
+      localStorage.setItem('userId', userId); 
      
-
-    
       if (role === 'ADMIN') {
         navigate('/admin');
       } else if (role === 'DOCTOR') {
@@ -45,7 +42,6 @@ function Login() {
       }
 
     } catch (err) {
-     
       console.error("Login Error:", err);
       setError('Invalid email or password. Please try again.');
     } finally {
@@ -61,16 +57,10 @@ function Login() {
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        
-        {/* -- ප්‍රධාන CARD එක -- */}
         <div className="bg-white py-10 px-8 shadow-2xl shadow-slate-200/50 sm:rounded-[2.5rem] sm:px-12 border border-slate-100 transition-all duration-300">
           
           <div className="flex items-center gap-4 mb-8 pb-6 border-b border-slate-100 justify-center sm:justify-start">
-            <img 
-              src={mediclinicLogo} 
-              alt="MediClinic Logo" 
-              className="w-14 h-14 object-contain" 
-            />
+            <img src={mediclinicLogo} alt="MediClinic Logo" className="w-14 h-14 object-contain" />
             <div>
               <h1 className="text-3xl font-extrabold text-slate-900 tracking-tighter">
                 Medi<span className="text-blue-600">Clinic</span>
@@ -88,21 +78,15 @@ function Login() {
             </p>
           </div>
           
-          {/* Form එකට onSubmit එක සම්බන්ධ කරලා තියෙන්නේ */}
           <form className="space-y-6" onSubmit={handleLogin}>
-            
-            {/* Error Message පෙන්වන කොටස */}
             {error && (
               <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg border border-red-100 text-center font-semibold">
                 {error}
               </div>
             )}
 
-            {/* Email Field */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 ml-1 mb-2">
-                Email or Staff ID
-              </label>
+              <label className="block text-sm font-bold text-slate-700 ml-1 mb-2">Email or Staff ID</label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
@@ -118,11 +102,8 @@ function Login() {
               </div>
             </div>
 
-            {/* Password Field */}
             <div>
-              <label className="block text-sm font-bold text-slate-700 ml-1 mb-2">
-                Password
-              </label>
+              <label className="block text-sm font-bold text-slate-700 ml-1 mb-2">Password</label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -138,7 +119,6 @@ function Login() {
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input id="remember-me" type="checkbox" className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-slate-300 rounded-md cursor-pointer" />
@@ -153,21 +133,18 @@ function Login() {
               </div>
             </div>
 
-            {/* Submit Button */}
             <div>
               <button 
-                type="submit" // මෙතන type="button" තිබ්බ එක type="submit" කළා
-                disabled={isLoading} // ලෝඩ් වෙද්දි ආයේ ඔබන්න බැරි වෙන්න
+                type="submit" 
+                disabled={isLoading} 
                 className={`w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-lg shadow-blue-500/30 text-sm font-extrabold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all hover:-translate-y-0.5 active:scale-95 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
                 {isLoading ? 'Authenticating...' : 'Sign in to Secure Portal'}
               </button>
             </div>
-            
           </form>
         </div>
         
-        {/* Footer info */}
         <p className="text-center text-xs text-slate-400 mt-10 font-medium">
           &copy; 2026 MediClinic Hospital. <br/>
           Unauthorized access is strictly prohibited. <br/>
