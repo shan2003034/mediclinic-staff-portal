@@ -2,11 +2,11 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import ReceptionDashboard from './pages/ReceptionDashboard';
-import StaffLayout from './components/StaffLayout'; 
+import StaffLayout from './components/StaffLayout';
 import PatientsDirectory from './pages/PatientsDirectory';
 import AppointmentsManagement from './pages/AppointmentsManagement';
 import BillingPage from './pages/BillingPage';
-import DoctorSchedule  from './pages/DoctorSchedule';
+import DoctorSchedule from './pages/DoctorSchedule';
 import DoctorDashboard from './pages/DoctorDashboard';
 import ActiveConsultation from './pages/ActiveConsultation';
 import ConsultationHistory from './pages/ConsultationHistory';
@@ -21,10 +21,10 @@ function App() {
   return (
     <Router>
       <Routes>
-       
+
         <Route path="/login" element={<Login />} />
 
-      
+
         <Route
           path="/reception/*"
           element={
@@ -77,8 +77,8 @@ function App() {
           }
         />
 
-        <Route path="/doctor/consultation/:patientId" element={<StaffLayout><ActiveConsultation /></StaffLayout>} />
-
+        {/* <Route path="/doctor/consultation/:patientId" element={<StaffLayout><ActiveConsultation /></StaffLayout>} /> */}
+        <Route path="/doctor/consultation" element={<StaffLayout><ActiveConsultation /></StaffLayout>} />
         <Route path="/doctor/consultations" element={<StaffLayout><ConsultationHistory /></StaffLayout>} />
         <Route path="/reception/settings" element={<StaffLayout><SettingsPage /></StaffLayout>} />
         <Route path="/doctor/settings" element={<StaffLayout><SettingsPage /></StaffLayout>} />
@@ -91,7 +91,7 @@ function App() {
 
 
 
-       
+
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

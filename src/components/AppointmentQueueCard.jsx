@@ -14,7 +14,8 @@ function AppointmentQueueCard({ appointment }) {
   };
 
   const handleStartConsultation = () => {
-    alert(`Starting consultation for ${appointment.patientName} (App. ID: ${appointment.appointmentId})`);
+    
+    navigate('/doctor/consultation', { state: { appointment } });
   };
 
   return (
