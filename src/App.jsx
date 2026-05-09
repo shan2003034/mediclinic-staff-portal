@@ -16,6 +16,7 @@ import StaffDirectory from './pages/StaffDirectory';
 import FinancialReports from './pages/FinancialReports';
 import TodayAppointments from './pages/TodayAppointments';
 import ScheduleAndLeaves from './pages/ScheduleAndLeaves';
+import MedicalRecords from './pages/MedicalRecords';
 
 
 function App() {
@@ -85,6 +86,7 @@ function App() {
         <Route path="/doctor/settings" element={<StaffLayout><SettingsPage /></StaffLayout>} />
         <Route path="/doctor/todayAppoinments" element={<StaffLayout><TodayAppointments /></StaffLayout>} />
         <Route path="/doctor/scheduleandlaeaves" element={<StaffLayout><ScheduleAndLeaves /></StaffLayout>} />
+        <Route path="/doctor/medicalrecords" element={<StaffLayout><MedicalRecords /></StaffLayout>} />
 
         <Route path="/admin" element={<StaffLayout><AdminDashboard /></StaffLayout>} />
         <Route path="/admin/staff" element={<StaffLayout><StaffDirectory /></StaffLayout>} />
