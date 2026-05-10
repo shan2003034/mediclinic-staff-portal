@@ -1,36 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import RegisterPatientModal from '../components/RegisterPatientModal';
 import PatientProfileOffcanvas from '../components/PatientProfileOffcanvas';
 
 function PatientsDirectory() {
-  // States පාලනය
+  const [patients, setPatients] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState(null); // Offcanvas එකට
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
   const patientsPerPage = 5;
 
-  // Mock Data (Pagination පෙන්වන්න 12ක් හදලා තියෙනවා)
-  const allPatients = Array.from({ length: 12 }, (_, i) => ({
-    id: `PID-10${25 - i}`,
-    name: i === 0 ? "Shan Gajanayake" : i === 1 ? "Kasun Perera" : `Patient Name ${i+1}`,
-    phone: `+94 77 ${Math.floor(1000000 + Math.random() * 9000000)}`,
-    age: 25 + (i * 2),
-    gender: i % 3 === 0 ? "Female" : "Male",
-    bloodGroup: i % 2 === 0 ? "O+" : "B+",
-    registeredDate: `${20 - i} Apr 2026`,
-    status: i % 4 === 0 ? "Inactive" : "Active"
-  }));
+  
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const token = localStorage.getItem('staffToken');
+        const response = await axios.get('http://localhost:8080/api/reception/patients/directory', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setPatients(response.data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching patients:", error);
+        setIsLoading(false);
+      }
+    };
 
-  // 1. Search Logic
-  const filteredPatients = allPatients.filter(patient => 
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    patient.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.phone.includes(searchTerm)
+    fetchPatients();
+  }, []);
+
+  
+  const filteredPatients = patients.filter(patient => 
+    (patient.fullName && patient.fullName.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    (patient.patientId && patient.patientId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (patient.phoneNumber && patient.phoneNumber.includes(searchTerm))
   );
 
-  // 2. Pagination Logic
+
   const indexOfLastPatient = currentPage * patientsPerPage;
   const indexOfFirstPatient = indexOfLastPatient - patientsPerPage;
   const currentPatients = filteredPatients.slice(indexOfFirstPatient, indexOfLastPatient);
@@ -41,7 +50,7 @@ function PatientsDirectory() {
   return (
     <div className="p-6 lg:p-8 font-sans animate-fade-in relative">
       
-      {/* Header & Actions */}
+      
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
         <div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight">Patients Directory</h1>
@@ -49,7 +58,7 @@ function PatientsDirectory() {
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
           
-          {/* Search Bar */}
+          
           <div className="relative w-full sm:w-72">
             <input 
               type="text" 
@@ -57,7 +66,7 @@ function PatientsDirectory() {
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1); // Search කරද්දී 1 වෙනි පිටුවට යනවා
+                setCurrentPage(1); 
               }}
               className="w-full pl-12 pr-5 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-700"
             />
@@ -74,7 +83,7 @@ function PatientsDirectory() {
         </div>
       </div>
 
-      {/* Main Table Area */}
+     
       <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -88,29 +97,37 @@ function PatientsDirectory() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {currentPatients.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="5" className="px-8 py-10 text-center text-slate-400 font-bold">Loading patients...</td>
+                </tr>
+              ) : currentPatients.length > 0 ? (
                 currentPatients.map((patient) => (
                   <tr key={patient.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-8 py-5 flex items-center gap-4">
-                      <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-extrabold text-lg">
-                        {patient.name.charAt(0)}
+                      <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-extrabold text-lg overflow-hidden shrink-0">
+                        {patient.profileImgPath ? (
+                          <img src={patient.profileImgPath} alt="" className="w-full h-full object-cover" onError={(e) => {e.target.style.display='none'; e.target.nextSibling.style.display='flex';}} />
+                        ) : null}
+                        <span className={patient.profileImgPath ? "hidden" : "flex w-full h-full items-center justify-center"}>
+                          {patient.fullName ? patient.fullName.charAt(0).toUpperCase() : 'U'}
+                        </span>
                       </div>
                       <div>
-                        {/* නම Click කරාම Offcanvas එක Open වෙනවා */}
                         <button 
                           onClick={() => setSelectedPatient(patient)}
                           className="font-bold text-slate-800 hover:text-blue-600 transition-colors text-left"
                         >
-                          {patient.name}
+                          {patient.fullName}
                         </button>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{patient.id} • {patient.gender}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{patient.patientId} • {patient.gender}</p>
                       </div>
                     </td>
-                    <td className="px-8 py-5 text-slate-600 font-semibold text-sm">{patient.phone}</td>
+                    <td className="px-8 py-5 text-slate-600 font-semibold text-sm">{patient.phoneNumber}</td>
                     <td className="px-8 py-5 text-slate-600 font-medium text-sm">{patient.registeredDate}</td>
                     <td className="px-8 py-5">
                       <span className={`text-[10px] font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-widest border shadow-sm ${
-                        patient.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'
+                        patient.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'
                       }`}>
                         {patient.status}
                       </span>
@@ -135,7 +152,7 @@ function PatientsDirectory() {
         </div>
       </div>
 
-      {/* Pagination Controls */}
+      
       {totalPages > 1 && (
         <div className="flex items-center justify-between bg-white px-8 py-5 rounded-3xl shadow-sm border border-slate-100">
           <p className="text-sm text-slate-500 font-medium hidden sm:block">
@@ -159,7 +176,6 @@ function PatientsDirectory() {
         </div>
       )}
 
-      {/* Components Rendered Here */}
       <RegisterPatientModal 
         isOpen={isRegisterModalOpen} 
         onClose={() => setIsRegisterModalOpen(false)} 
