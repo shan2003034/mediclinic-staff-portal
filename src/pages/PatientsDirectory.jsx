@@ -179,6 +179,7 @@ function PatientsDirectory() {
       <RegisterPatientModal 
         isOpen={isRegisterModalOpen} 
         onClose={() => setIsRegisterModalOpen(false)} 
+        onSuccess={() => window.location.reload()} 
       />
 
       <PatientProfileOffcanvas 
