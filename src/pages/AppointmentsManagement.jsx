@@ -51,7 +51,7 @@ function AppointmentsManagement() {
 
   // 2. Filtering (Search + Doctor + Date)
   const filteredAppointments = sortedAppointments.filter(apt => {
-   
+    
     const matchesSearch = 
       (apt.patientName && apt.patientName.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (apt.appointmentId && apt.appointmentId.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -61,7 +61,7 @@ function AppointmentsManagement() {
     const matchesDoctor = selectedDoctor === 'All Doctors' || apt.doctorName === selectedDoctor;
 
     
-    const matchesDate = selectedDate === '' || apt.appointmentDate === selectedDate;
+    const matchesDate = selectedDate === '' || (apt.appointmentDate && apt.appointmentDate.includes(selectedDate));
 
     return matchesSearch && matchesDoctor && matchesDate;
   });
