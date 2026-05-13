@@ -270,6 +270,12 @@ function AppointmentsManagement() {
         onClose={() => setIsModalOpen(false)} 
       />
 
+      <NewAppointmentModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={() => window.location.reload()} 
+      />
+
     </div>
   );
 }
