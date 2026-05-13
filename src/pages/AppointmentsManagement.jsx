@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import StatCard from '../components/StatCard';
 import NewAppointmentModal from '../components/NewAppointmentModal';
 
@@ -6,37 +7,66 @@ function AppointmentsManagement() {
   // States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  
+  const [selectedDoctor, setSelectedDoctor] = useState('All Doctors');
+  const [selectedDate, setSelectedDate] = useState('');
+
   const [currentPage, setCurrentPage] = useState(1);
+  const [appointments, setAppointments] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const appointmentsPerPage = 5;
 
-  // 1. Stats Array (Map කරලා StatCard එකට යවන්න)
-  const stats = [
-    { label: "Total Bookings", value: "124", iconPath: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", color: "blue" },
-    { label: "Pending", value: "18", iconPath: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", color: "amber" },
-    { label: "Completed", value: "98", iconPath: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", color: "emerald" },
-    { label: "Canceled", value: "08", iconPath: "M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z", color: "rose" },
-  ];
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('staffToken');
+        const headers = { Authorization: `Bearer ${token}` };
 
-  // 2. Mock Data (Pagination පෙන්වන්න 15ක් හදලා තියෙනවා)
-  const allAppointments = Array.from({ length: 15 }, (_, i) => ({
-    id: `APT-${2045 + i}`,
-    patient: i === 0 ? "Shan Gajanayake" : i === 1 ? "Kasun Perera" : `Patient Name ${i + 1}`,
-    doctor: i % 2 === 0 ? "Dr. Sarah Johnson" : "Dr. Michael Lee",
-    specialty: i % 2 === 0 ? "Cardiology" : "Neurology",
-    date: `2026-04-${27 + (i % 3)}`,
-    time: `10:${i < 10 ? '0' + i : i} AM`,
-    status: i % 4 === 0 ? "Confirmed" : i % 3 === 0 ? "Checked In" : i % 5 === 0 ? "Canceled" : "Pending",
-    type: i % 2 === 0 ? "Consultation" : "Follow-up"
-  }));
+        const [appointmentsRes, summaryRes] = await Promise.all([
+          axios.get('http://localhost:8080/api/reception/appointments/all', { headers }),
+          axios.get('http://localhost:8080/api/reception/appointments/summary', { headers })
+        ]);
 
-  // 3. Search Logic
-  const filteredAppointments = allAppointments.filter(apt => 
-    apt.patient.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    apt.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    apt.doctor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+        setAppointments(appointmentsRes.data);
+        setSummary(summaryRes.data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+        setIsLoading(false);
+      }
+    };
 
-  // 4. Pagination Logic
+    fetchData();
+  }, []);
+
+
+  const uniqueDoctors = ['All Doctors', ...new Set(appointments.map(apt => apt.doctorName).filter(Boolean))];
+
+ 
+  const sortedAppointments = [...appointments].sort((a, b) => b.id - a.id);
+
+  // 2. Filtering (Search + Doctor + Date)
+  const filteredAppointments = sortedAppointments.filter(apt => {
+   
+    const matchesSearch = 
+      (apt.patientName && apt.patientName.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (apt.appointmentId && apt.appointmentId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (apt.doctorName && apt.doctorName.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  
+    const matchesDoctor = selectedDoctor === 'All Doctors' || apt.doctorName === selectedDoctor;
+
+    
+    const matchesDate = selectedDate === '' || apt.appointmentDate === selectedDate;
+
+    return matchesSearch && matchesDoctor && matchesDate;
+  });
+
+  // 3. Pagination Logic
   const indexOfLastAppointment = currentPage * appointmentsPerPage;
   const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage;
   const currentAppointments = filteredAppointments.slice(indexOfFirstAppointment, indexOfLastAppointment);
@@ -62,21 +92,40 @@ function AppointmentsManagement() {
         </button>
       </div>
 
-      {/* Quick Stats Area (Reusable Component) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {stats.map((item, index) => (
+      {/* Quick Stats Area */}
+      {!isLoading && summary && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <StatCard 
-            key={index}
-            label={item.label}
-            value={item.value}
-            iconPath={item.iconPath}
-            color={item.color}
+            title="Total Bookings" 
+            value={summary.totalAppointments} 
+            bgColorClass="bg-blue-50" colorClass="text-blue-600"
+            icon={<svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>}
           />
-        ))}
-      </div>
+          <StatCard 
+            title="Pending" 
+            value={summary.pendingAppointments} 
+            bgColorClass="bg-amber-50" colorClass="text-amber-600"
+            icon={<svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>}
+          />
+          <StatCard 
+            title="Confirmed" 
+            value={summary.confirmedAppointments} 
+            bgColorClass="bg-emerald-50" colorClass="text-emerald-600"
+            icon={<svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>}
+          />
+          <StatCard 
+            title="Canceled" 
+            value={summary.cancelledAppointments} 
+            bgColorClass="bg-rose-50" colorClass="text-rose-600"
+            icon={<svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>}
+          />
+        </div>
+      )}
 
       {/* Filter & Search Bar */}
       <div className="bg-white p-4 rounded-[2rem] shadow-sm border border-slate-100 mb-8 flex flex-wrap items-center gap-4">
+        
+        {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
           <input 
             type="text" 
@@ -84,18 +133,46 @@ function AppointmentsManagement() {
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              setCurrentPage(1); // Search කරද්දී 1 වෙනි පිටුවට යනවා
+              setCurrentPage(1);
             }}
             className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-sm"
           />
           <svg className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
-        <select className="px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-slate-600 text-sm outline-none focus:border-blue-500 cursor-pointer">
-          <option>All Doctors</option>
-          <option>Dr. Sarah Johnson</option>
-          <option>Dr. Michael Lee</option>
+
+        {/* Doctor Filter Dropdown */}
+        <select 
+          value={selectedDoctor}
+          onChange={(e) => {
+            setSelectedDoctor(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-slate-600 text-sm outline-none focus:border-blue-500 cursor-pointer"
+        >
+          {uniqueDoctors.map((docName, index) => (
+            <option key={index} value={docName}>{docName}</option>
+          ))}
         </select>
-        <input type="date" className="px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-slate-600 text-sm outline-none focus:border-blue-500" />
+
+        {/* Date Filter Input */}
+        <div className="relative flex items-center">
+          <input 
+            type="date" 
+            value={selectedDate}
+            onChange={(e) => {
+              setSelectedDate(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-slate-600 text-sm outline-none focus:border-blue-500" 
+          />
+          
+          {selectedDate && (
+             <button onClick={() => { setSelectedDate(''); setCurrentPage(1); }} className="absolute right-3 text-slate-400 hover:text-rose-500">
+               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+             </button>
+          )}
+        </div>
+
       </div>
 
       {/* Appointments Table */}
@@ -112,28 +189,33 @@ function AppointmentsManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {currentAppointments.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="5" className="px-8 py-10 text-center text-slate-400 font-bold">Loading Appointments...</td>
+                </tr>
+              ) : currentAppointments.length > 0 ? (
                 currentAppointments.map((apt) => (
                   <tr key={apt.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-8 py-5">
-                      <p className="font-bold text-slate-800">{apt.patient}</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{apt.id} • {apt.type}</p>
+                      <p className="font-bold text-slate-800">{apt.patientName}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{apt.appointmentId} • {apt.reasonForVisit}</p>
                     </td>
                     <td className="px-8 py-5">
-                      <p className="font-bold text-slate-700 text-sm">{apt.doctor}</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{apt.specialty}</p>
+                      <p className="font-bold text-slate-700 text-sm">{apt.doctorName}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{apt.doctorSpecialty}</p>
                     </td>
                     <td className="px-8 py-5">
-                      <p className="text-sm font-bold text-slate-800">{apt.date}</p>
-                      <p className="text-xs font-bold text-blue-600 mt-0.5">{apt.time}</p>
+                      <p className="text-sm font-bold text-slate-800">{apt.appointmentDate}</p>
+                      <p className="text-xs font-bold text-blue-600 mt-0.5">{apt.appointmentTime}</p>
                     </td>
                     <td className="px-8 py-5">
                       <span className={`text-[10px] font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-widest border shadow-sm ${
-                        apt.status === 'Checked In' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                        apt.status === 'Canceled' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                        apt.status === 'Pending' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                        apt.status?.includes('COMPLETED') ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                        apt.status?.includes('SCHEDULED') ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                        apt.status?.includes('CANCEL') ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                        'bg-amber-50 text-amber-600 border-amber-100'
                       }`}>
-                        {apt.status}
+                        {apt.status || 'PENDING'}
                       </span>
                     </td>
                     <td className="px-8 py-5 text-right">
